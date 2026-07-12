@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RitualProof — On-chain Media Authenticity</title>
+  <style>
+    :root {
+      --bg: #0a0a0f; --panel: #14141f; --panel2: #1c1c2b; --line: #2a2a3d;
+      --txt: #e8e8f0; --muted: #9a9ab0; --accent: #7c5cff; --accent2: #00e0c6;
+      --ai: #ff5470; --real: #2ecf7f; --warn: #ffb020;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: radial-gradient(1200px 600px at 70% -10%, #1a1330 0%, var(--bg) 55%);
+      color: var(--txt); font: 15px/1.5 -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+    a { color: var(--accent2); }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 26px; border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; background: rgba(10,10,15,.82); backdrop-filter: blur(8px); z-index: 5;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid; place-items: center; font-weight: 800; color: #0a0a0f;
+    }
+    .brand h1 { font-size: 17px; margin: 0; letter-spacing: .2px; }
+    .brand span { color: var(--muted); font-size: 12px; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 26px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--line); border-radius: 16px; padding: 20px;
+    }
+    .card h2 { margin: 0 0 4px; font-size: 15px; }
+    .card p.hint { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+    .btn {
+      border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 600; cursor: pointer;
+      background: var(--accent); color: white; font-size: 14px; transition: .15s;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--txt); }
+    .btn.sm { padding: 6px 12px; font-size: 13px; }
+    .drop {
+      border: 1.5px dashed var(--line); border-radius: 12px; padding: 26px; text-align: center;
+      color: var(--muted); cursor: pointer; transition: .15s; background: rgba(255,255,255,.02);
+    }
+    .drop:hover, .drop.over { border-color: var(--accent); color: var(--txt); }
+    .preview { display: flex; gap: 16px; margin-top: 16px; align-items: flex-start; }
+    .preview img, .preview canvas { max-width: 150px; max-height: 150px; border-radius: 10px; border: 1px solid var(--line); }
+    .kv { font-size: 13px; }
+    .kv div { margin-bottom: 5px; }
+    .kv b { color: var(--muted); font-weight: 500; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; word-break: break-all; }
+    .verdict { display: inline-flex; align-items: center; gap: 7px; font-weight: 700; padding: 4px 12px; border-radius: 999px; font-size: 13px; }
+    .verdict.ai { background: rgba(255,84,112,.15); color: var(--ai); }
+    .verdict.real { background: rgba(46,207,127,.15); color: var(--real); }
+    .verdict.none { background: rgba(154,154,176,.15); color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 500; font-size: 12px; }
+    .pill { padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .pill.ai { background: rgba(255,84,112,.15); color: var(--ai); }
+    .pill.real { background: rgba(46,207,127,.15); color: var(--real); }
+    .status { font-size: 13px; color: var(--muted); margin-top: 12px; min-height: 18px; }
+    .status.err { color: var(--ai); }
+    .status.ok { color: var(--real); }
+    .netbar { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+    .dot.on { background: var(--real); }
+    .feats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
+    .feat { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 8px; padding: 6px; text-align: center; }
+    .feat b { display: block; font-size: 11px; color: var(--muted); }
+    .feat span { font-family: ui-monospace, monospace; font-size: 12px; }
+    .banner { background: rgba(124,92,255,.08); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: var(--muted); }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    select { background: var(--panel2); color: var(--txt); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">R</div>
+      <div>
+        <h1>RitualProof</h1>
+        <span>On-chain media authenticity · ONNX precompile · Ritual Chain 1979</span>
+      </div>
+    </div>
+    <div class="netbar">
+      <span class="dot" id="netDot"></span>
+      <span id="netLabel" style="font-size:13px;color:var(--muted)">read-only</span>
+      <button class="btn sm" id="connectBtn">Connect wallet</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="banner" id="modelBanner">Loading on-chain model…</div>
+
+    <div class="grid">
+      <!-- ANALYZE -->
+      <div class="card">
+        <h2>Analyze &amp; register</h2>
+        <p class="hint">Upload media → a forensic feature vector is extracted in your browser → the ONNX classifier runs <b>on-chain</b> → the verdict is written immutably, keyed by the media's keccak256 hash.</p>
+        <div class="drop" id="drop">
+          <div>📤 Drop an image here, or click to choose a file</div>
+          <input type="file" id="file" accept="image/*,video/*,audio/*" hidden />
+        </div>
+        <div id="analyzeBody" style="display:none">
+          <div class="preview">
+            <div id="thumb"></div>
+            <div class="kv">
+              <div><b>file</b> <span id="fName"></span></div>
+              <div><b>type</b>
+                <select id="mediaType">
+                  <option value="0">Image</option>
+                  <option value="1">Video</option>
+                  <option value="2">Audio</option>
+                </select>
+              </div>
+              <div><b>hash</b> <span class="mono" id="fHash"></span></div>
+              <div><b>predicted</b> <span id="preVerdict">—</span></div>
+            </div>
+          </div>
+          <div class="feats" id="feats"></div>
+          <div class="row" style="margin-top:16px">
+            <button class="btn" id="analyzeBtn" disabled>Analyze on-chain</button>
+            <button class="btn ghost sm" id="clearBtn">Clear</button>
+          </div>
+          <div class="status" id="analyzeStatus"></div>
+        </div>
+      </div>
+
+      <!-- VERIFY -->
+      <div class="card">
+        <h2>Verify a file</h2>
+        <p class="hint">Check whether a piece of media has already been analyzed and what verdict is recorded on-chain. Nothing is written — pure read.</p>
+        <div class="drop" id="vdrop">
+          <div>🔍 Drop a file to look up its record</div>
+          <input type="file" id="vfile" accept="image/*,video/*,audio/*" hidden />
+        </div>
+        <div id="verifyResult" style="display:none;margin-top:16px">
+          <div class="kv">
+            <div><b>hash</b> <span class="mono" id="vHash"></span></div>
+          </div>
+          <div style="margin:12px 0"><span id="vVerdict" class="verdict none">not registered</span></div>
+          <div class="kv" id="vDetails"></div>
+        </div>
+        <div class="status" id="verifyStatus"></div>
+      </div>
+    </div>
+
+    <!-- REGISTRY -->
+    <div class="card" style="margin-top:20px">
+      <div class="row" style="justify-content:space-between">
+        <h2>Registry <span style="color:var(--muted);font-weight:400" id="regCount"></span></h2>
+        <button class="btn ghost sm" id="refreshBtn">Refresh</button>
+      </div>
+      <p class="hint">Most recent on-chain verdicts.</p>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr><th>Media hash</th><th>Verdict</th><th>Score</th><th>Type</th><th>When</th><th>Submitter</th></tr>
+          </thead>
+          <tbody id="regBody"><tr><td colspan="6" style="color:var(--muted)">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p style="color:var(--muted);font-size:12px;margin-top:24px">
+      Contract: <a id="ctrLink" target="_blank" rel="noopener"></a> ·
+      The default classifier is Ritual's public <span class="mono">sample_linreg</span> model (a stand-in);
+      the owner can hot-swap a trained deepfake detector via <span class="mono">setModel()</span> with no redeploy.
+    </p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
