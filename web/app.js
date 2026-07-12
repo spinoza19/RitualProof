@@ -166,15 +166,6 @@ async function loadRegistry() {
       </div>`;
     }).join('') : `<div style="padding:28px 18px;color:#5C574C;">No verdicts etched yet — be the first.</div>`;
 
-    // ticker
-    const tick = rows.concat(rows).map(({ hash, r }) =>
-      `<span style="display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.14em;white-space:nowrap;">
-        <span style="color:${verdictColor(r.isAI)};">◆ ${r.isAI ? 'SYNTHETIC' : 'AUTHENTIC'}</span>
-        <span style="color:#8F887A;">${shortHash(hash)}</span>
-        <span style="color:#5C574C;">${scoreOf(r.score).toFixed(3)} · ${ago(r.timestamp)}</span>
-      </span>`).join('');
-    $('ticker').innerHTML = tick || '';
-
     if (gsap && !reduced) {
       const rowsEl = gsap.utils.toArray('[data-registry-row]');
       if (rowsEl.length) gsap.from(rowsEl, { x: -30, opacity: 0, duration: 0.7, ease: 'power2.out', stagger: 0.05,
