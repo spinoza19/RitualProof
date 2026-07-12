@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RitualProof — Forensic Permanence Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: #0B0A08; color: #EDE8DC; font-family: 'IBM Plex Mono', monospace; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+    a { color: #EDE8DC; text-decoration: none; }
+    a:hover { color: oklch(0.8 0.13 80); }
+    button { font-family: inherit; cursor: pointer; }
+    ::selection { background: oklch(0.8 0.13 80); color: #0B0A08; }
+    .gold { color: oklch(0.8 0.13 80); }
+    .hidden { display: none !important; }
+    @keyframes rp-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes rp-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes rp-drift { from { background-position: 0 0; } to { background-position: 0 640px; } }
+    @keyframes rp-sweep { 0% { top: -4%; } 100% { top: 104%; } }
+    @keyframes rp-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .navlink { opacity: .85; font-size: 11px; letter-spacing: .22em; }
+    .btn-ghost { padding: 12px 20px; background: transparent; border: 1px solid rgba(237,232,220,0.25); color: #EDE8DC; font-size: 11px; letter-spacing: .2em; }
+    .btn-ghost:hover { border-color: oklch(0.8 0.13 80); color: oklch(0.8 0.13 80); }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ambient scanline field -->
+  <div id="crt1" aria-hidden="true" style="position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: 0.5; background: repeating-linear-gradient(0deg, rgba(237,232,220,0.025) 0px, rgba(237,232,220,0.025) 1px, transparent 1px, transparent 4px); animation: rp-drift 24s linear infinite;"></div>
+  <div aria-hidden="true" style="position: fixed; inset: 0; pointer-events: none; z-index: 61; background: radial-gradient(ellipse 120% 90% at 50% 40%, transparent 55%, rgba(4,3,2,0.55) 100%);"></div>
+
+  <!-- NAV -->
+  <nav id="nav" style="position: fixed; top: 0; left: 0; right: 0; z-index: 80; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; background: linear-gradient(180deg, rgba(11,10,8,0.92), rgba(11,10,8,0.75) 70%, transparent); backdrop-filter: blur(6px);">
+    <a href="#top" style="display: flex; align-items: center; gap: 10px; font-size: 13px; letter-spacing: 0.28em; font-weight: 600;">
+      <span aria-hidden="true" style="width: 10px; height: 10px; background: oklch(0.8 0.13 80); transform: rotate(45deg); display: inline-block; box-shadow: 0 0 12px oklch(0.8 0.13 80 / 0.8);"></span>
+      RITUALPROOF
+    </a>
+    <div style="display: flex; align-items: center; gap: 26px;">
+      <a href="#analyze" class="navlink">01 ANALYZE</a>
+      <a href="#verify" class="navlink">02 VERIFY</a>
+      <a href="#registry" class="navlink">03 REGISTRY</a>
+      <span id="netPill" style="display: flex; align-items: center; gap: 8px; color: oklch(0.82 0.15 152); border: 1px solid oklch(0.82 0.15 152 / 0.35); padding: 6px 10px; font-size: 11px; letter-spacing: .18em;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(0.82 0.15 152); animation: rp-blink 1.6s steps(1) infinite;"></span>
+        RITUAL · 1979
+      </span>
+      <button id="connectBtn" style="padding: 8px 16px; background: oklch(0.8 0.13 80); color: #0B0A08; border: 0; font-size: 11px; letter-spacing: .2em; font-weight: 600;">CONNECT</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header id="top" style="min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; position: relative; padding: 140px 28px 0;">
+    <div style="max-width: 1240px; margin: 0 auto; width: 100%;">
+      <p id="heroKicker" style="font-size: 12px; letter-spacing: 0.34em; color: oklch(0.8 0.13 80); margin: 0 0 28px;">FORENSIC PERMANENCE ENGINE — ONNX PRECOMPILE · CHAIN 1979</p>
+      <h1 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(52px, 9.2vw, 148px); line-height: 0.98; margin: 0; letter-spacing: -0.01em;">
+        <span id="heroL1" style="display: block;">Every image is a claim.</span>
+        <span id="heroL2" style="display: block; font-style: italic; color: oklch(0.8 0.13 80);">We test it. Forever.</span>
+      </h1>
+      <div id="heroSub" style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 28px; margin-top: 40px;">
+        <p style="max-width: 560px; font-size: 13px; line-height: 1.8; color: #8F887A; margin: 0;">RitualProof runs a machine-learning classifier <span class="gold">inside the blockchain itself</span> — via Ritual's on-chain ONNX precompile — then etches the verdict into an immutable public ledger, keyed by the media's cryptographic hash. Real or synthetic, judged once, remembered forever.</p>
+        <div style="display: flex; gap: 14px;">
+          <a href="#analyze" style="display: inline-block; padding: 16px 28px; background: oklch(0.8 0.13 80); color: #0B0A08; font-size: 12px; letter-spacing: 0.24em; font-weight: 600;">SUBMIT SPECIMEN ↓</a>
+          <a href="#registry" style="display: inline-block; padding: 16px 28px; border: 1px solid rgba(237,232,220,0.25); font-size: 12px; letter-spacing: 0.24em;">THE LEDGER</a>
+        </div>
+      </div>
+
+      <!-- stats -->
+      <div id="heroStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1px; background: rgba(237,232,220,0.14); border: 1px solid rgba(237,232,220,0.14); margin-top: 64px;"></div>
+    </div>
+
+    <!-- verdict ticker -->
+    <div style="border-top: 1px solid rgba(237,232,220,0.14); border-bottom: 1px solid rgba(237,232,220,0.14); margin-top: 72px; overflow: hidden; padding: 12px 0; background: #0E0D0A;">
+      <div id="ticker" style="display: flex; gap: 48px; width: max-content; animation: rp-marquee 40s linear infinite;"></div>
+    </div>
+  </header>
+
+  <!-- ANALYZE -->
+  <section id="analyze" data-reveal="true" style="padding: 140px 28px 120px; position: relative;">
+    <div style="max-width: 1240px; margin: 0 auto;">
+      <div style="display: flex; align-items: baseline; gap: 24px; border-bottom: 1px solid rgba(237,232,220,0.14); padding-bottom: 20px; margin-bottom: 48px;">
+        <span style="font-size: 12px; letter-spacing: 0.3em; color: oklch(0.8 0.13 80);">01 /</span>
+        <h2 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(36px, 5vw, 64px); margin: 0;">Analyze</h2>
+        <span style="font-size: 11px; letter-spacing: 0.2em; color: #8F887A; margin-left: auto;">SUBMIT MEDIA FOR JUDGEMENT</span>
+      </div>
+
+      <!-- IDLE -->
+      <div id="aIdle">
+        <div id="drop" role="button" tabindex="0" aria-label="Drop an image to analyze, or press Enter to browse"
+          style="border: 1px dashed rgba(237,232,220,0.3); background: #0E0D0A; min-height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; cursor: pointer; position: relative; transition: border-color 0.25s, background .25s;">
+          <div aria-hidden="true" style="width: 64px; height: 64px; border: 1px solid rgba(237,232,220,0.35); transform: rotate(45deg); display: flex; align-items: center; justify-content: center;">
+            <div style="width: 10px; height: 10px; background: oklch(0.8 0.13 80); box-shadow: 0 0 16px oklch(0.8 0.13 80);"></div>
+          </div>
+          <div style="font-size: 14px; letter-spacing: 0.3em; font-weight: 600;">DROP SPECIMEN HERE</div>
+          <div style="font-size: 11px; letter-spacing: 0.16em; color: #8F887A;">IMAGE · OR CLICK TO BROWSE · JUDGEMENT IS PERMANENT</div>
+        </div>
+        <input type="file" accept="image/*,video/*,audio/*" id="aInput" style="display: none;" aria-hidden="true">
+      </div>
+
+      <!-- SCANNING -->
+      <div id="aScan" class="hidden">
+        <div style="display: grid; grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr); gap: 1px; background: rgba(237,232,220,0.14); border: 1px solid rgba(237,232,220,0.14);" aria-live="polite">
+          <div style="background: #0E0D0A; position: relative; min-height: 420px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <img id="previewImg" alt="Specimen under analysis" style="width: 100%; height: 420px; object-fit: cover; display: block; filter: saturate(0.7) contrast(1.05);">
+            <div aria-hidden="true" style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 39px, oklch(0.8 0.13 80 / 0.12) 39px 40px), repeating-linear-gradient(90deg, transparent 0 39px, oklch(0.8 0.13 80 / 0.12) 39px 40px);"></div>
+            <div aria-hidden="true" style="position: absolute; left: 0; right: 0; height: 3px; top: -4%; background: oklch(0.8 0.13 80); box-shadow: 0 0 24px 4px oklch(0.8 0.13 80 / 0.7); animation: rp-sweep 1.8s ease-in-out infinite alternate;"></div>
+            <div id="specLabel" style="position: absolute; left: 14px; top: 12px; font-size: 10px; letter-spacing: 0.22em; color: oklch(0.8 0.13 80); background: rgba(11,10,8,0.7); padding: 6px 10px;">SPECIMEN</div>
+          </div>
+          <div style="background: #0E0D0A; padding: 28px; display: flex; flex-direction: column; min-height: 420px; box-sizing: border-box;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid rgba(237,232,220,0.14); padding-bottom: 16px;">
+              <span style="font-size: 11px; letter-spacing: 0.26em; color: #8F887A;">FORENSIC PASS</span>
+              <span style="font-size: clamp(36px, 4vw, 56px); font-weight: 600; color: oklch(0.8 0.13 80);"><span id="pct">0</span>%</span>
+            </div>
+            <div id="log" style="flex: 1; padding-top: 18px; font-size: 12px; line-height: 2.1; letter-spacing: 0.08em; color: #B8B1A2; overflow: hidden;"></div>
+            <div style="font-size: 10px; letter-spacing: 0.24em; color: #5C574C; display: flex; align-items: center; gap: 10px;">
+              <span aria-hidden="true" style="width: 10px; height: 10px; border: 1px solid oklch(0.8 0.13 80); border-top-color: transparent; border-radius: 50%; animation: rp-spin 0.9s linear infinite; display: inline-block;"></span>
+              ON-CHAIN INFERENCE — DO NOT LOOK AWAY
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VERDICT -->
+      <div id="aVerdict" class="hidden">
+        <div id="verdictPanel" style="border: 1px solid rgba(237,232,220,0.2); background: #0E0D0A; position: relative; overflow: hidden; padding: clamp(48px, 8vw, 110px) 28px; text-align: center;" aria-live="assertive">
+          <div id="flash" aria-hidden="true" style="position: absolute; inset: 0; opacity: 0; pointer-events: none;"></div>
+          <div id="ring" aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px; border: 1px solid #fff; border-radius: 50%; opacity: 0; pointer-events: none;"></div>
+          <p id="verdictKicker" style="font-size: 11px; letter-spacing: 0.34em; color: #8F887A; margin: 0 0 18px;">ON-CHAIN INFERENCE — ONNX PRECOMPILE 0x0800</p>
+          <div id="verdictWord" style="font-family: 'Instrument Serif', serif; font-style: italic; font-size: clamp(64px, 12vw, 190px); line-height: 1;">—</div>
+          <p id="verdictSub" style="font-size: 12px; letter-spacing: 0.3em; color: #EDE8DC; margin: 22px 0 0;"></p>
+
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1px; background: rgba(237,232,220,0.14); border: 1px solid rgba(237,232,220,0.14); max-width: 860px; margin: 56px auto 0;">
+            <div style="background: #0B0A08; padding: 20px 28px; flex: 1; min-width: 200px;">
+              <div style="font-size: 10px; letter-spacing: 0.26em; color: #8F887A;">MODEL SCORE</div>
+              <div style="font-size: 34px; font-weight: 600; margin-top: 6px;"><span id="score">0.0</span></div>
+            </div>
+            <div style="background: #0B0A08; padding: 20px 28px; flex: 2; min-width: 260px;">
+              <div style="font-size: 10px; letter-spacing: 0.26em; color: #8F887A;">MEDIA FINGERPRINT — KECCAK-256</div>
+              <div id="hashOut" style="font-size: 13px; color: #B8B1A2; margin-top: 12px; word-break: break-all; line-height: 1.7;"></div>
+            </div>
+            <div style="background: #0B0A08; padding: 20px 28px; flex: 1; min-width: 200px; display: flex; align-items: center; justify-content: center;">
+              <div id="seal" style="border: 2px solid #8F887A; color: #8F887A; padding: 12px 18px; font-size: 11px; letter-spacing: 0.28em; transform: rotate(-8deg); opacity: 0;">PREVIEW</div>
+            </div>
+          </div>
+
+          <div id="etchStatus" style="font-size: 11px; letter-spacing: .16em; color: #8F887A; margin-top: 30px; min-height: 16px;"></div>
+
+          <div style="margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;">
+            <button id="etchBtn" style="padding: 15px 30px; background: oklch(0.8 0.13 80); color: #0B0A08; border: 0; font-size: 11px; letter-spacing: 0.24em; font-weight: 600;">ETCH ON-CHAIN ⟶</button>
+            <button id="resetBtn" class="btn-ghost" style="padding: 15px 26px;">ANALYZE ANOTHER</button>
+            <a href="#registry" style="padding: 15px 26px; border: 1px solid rgba(237,232,220,0.25); font-size: 11px; letter-spacing: 0.24em; display: inline-flex; align-items: center;">VIEW IN LEDGER →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERIFY -->
+  <section id="verify" data-reveal="true" style="padding: 40px 28px 120px;">
+    <div style="max-width: 1240px; margin: 0 auto;">
+      <div style="display: flex; align-items: baseline; gap: 24px; border-bottom: 1px solid rgba(237,232,220,0.14); padding-bottom: 20px; margin-bottom: 48px;">
+        <span style="font-size: 12px; letter-spacing: 0.3em; color: oklch(0.8 0.13 80);">02 /</span>
+        <h2 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(36px, 5vw, 64px); margin: 0;">Verify</h2>
+        <span style="font-size: 11px; letter-spacing: 0.2em; color: #8F887A; margin-left: auto;">HAS IT BEEN JUDGED BEFORE?</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1px; background: rgba(237,232,220,0.14); border: 1px solid rgba(237,232,220,0.14);">
+        <div id="vdrop" role="button" tabindex="0" aria-label="Drop any file to check the ledger"
+          style="background: #0E0D0A; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; cursor: pointer; border-right: 1px dashed rgba(237,232,220,0.2); transition: background .25s;">
+          <div aria-hidden="true" style="font-family: 'Instrument Serif', serif; font-style: italic; font-size: 44px; color: oklch(0.8 0.13 80);">?</div>
+          <div style="font-size: 13px; letter-spacing: 0.28em; font-weight: 600;">DROP ANY FILE</div>
+          <div style="font-size: 11px; letter-spacing: 0.16em; color: #8F887A;">WE HASH IT · WE ASK THE LEDGER</div>
+        </div>
+        <input type="file" id="vInput" style="display: none;" aria-hidden="true">
+
+        <div id="verifyCard" style="background: #0E0D0A; min-height: 300px; padding: 32px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box;" aria-live="polite">
+          <div id="vIdle" style="font-size: 12px; letter-spacing: 0.18em; color: #5C574C; line-height: 2;">// AWAITING QUERY<br>// THE LEDGER NEVER FORGETS<span style="animation: rp-blink 1.1s steps(1) infinite;">_</span></div>
+          <div id="vBusy" class="hidden" style="font-size: 12px; letter-spacing: 0.2em; color: oklch(0.8 0.13 80); display: flex; align-items: center; gap: 12px;">
+            <span aria-hidden="true" style="width: 12px; height: 12px; border: 1px solid oklch(0.8 0.13 80); border-top-color: transparent; border-radius: 50%; animation: rp-spin 0.8s linear infinite; display: inline-block;"></span>
+            <span id="vBusyName">INTERROGATING LEDGER</span>
+          </div>
+          <div id="vFound" class="hidden">
+            <div style="font-size: 10px; letter-spacing: 0.28em; color: #8F887A;">RECORD LOCATED</div>
+            <div id="vVerdict" style="font-family: 'Instrument Serif', serif; font-style: italic; font-size: clamp(40px, 5vw, 64px); margin-top: 10px; line-height: 1;">—</div>
+            <div id="vMeta" style="font-size: 12px; color: #B8B1A2; margin-top: 18px; line-height: 2; letter-spacing: 0.06em;"></div>
+          </div>
+          <div id="vMissing" class="hidden">
+            <div style="font-size: 10px; letter-spacing: 0.28em; color: #8F887A;">NO RECORD FOUND</div>
+            <div style="font-family: 'Instrument Serif', serif; font-style: italic; font-size: clamp(36px, 4.4vw, 56px); color: #EDE8DC; margin-top: 10px; line-height: 1.1;">Unjudged.</div>
+            <div style="font-size: 12px; color: #B8B1A2; margin-top: 18px; line-height: 2; letter-spacing: 0.06em;">This fingerprint has never faced the ritual.<br><a href="#analyze" style="color: oklch(0.8 0.13 80); border-bottom: 1px solid oklch(0.8 0.13 80 / 0.4);">SUBMIT IT FOR JUDGEMENT ↑</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRY -->
+  <section id="registry" data-reveal="true" style="padding: 40px 28px 140px;">
+    <div style="max-width: 1240px; margin: 0 auto;">
+      <div style="display: flex; align-items: baseline; gap: 24px; border-bottom: 1px solid rgba(237,232,220,0.14); padding-bottom: 20px; margin-bottom: 8px;">
+        <span style="font-size: 12px; letter-spacing: 0.3em; color: oklch(0.8 0.13 80);">03 /</span>
+        <h2 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(36px, 5vw, 64px); margin: 0;">The Registry</h2>
+        <span id="regMeta" style="font-size: 11px; letter-spacing: 0.2em; color: #8F887A; margin-left: auto;">LATEST VERDICTS · IMMUTABLE</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 130px 1fr 120px 90px 100px 120px; gap: 16px; padding: 14px 18px; font-size: 10px; letter-spacing: 0.26em; color: #5C574C;" aria-hidden="true">
+        <span>VERDICT</span><span>FINGERPRINT</span><span>SCORE</span><span>TYPE</span><span>WHEN</span><span>AUTHOR</span>
+      </div>
+      <div id="registry" role="list" aria-label="Recent verdicts"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top: 1px solid rgba(237,232,220,0.14); padding: 48px 28px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between;">
+    <div style="font-family: 'Instrument Serif', serif; font-style: italic; font-size: clamp(24px, 3vw, 36px); color: #8F887A;">Truth, once etched, does not negotiate.</div>
+    <div style="font-size: 10px; letter-spacing: 0.24em; color: #5C574C;">RITUALPROOF · <a id="ctrLink" target="_blank" rel="noopener" class="gold">CONTRACT</a> · ALL VERDICTS FINAL</div>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

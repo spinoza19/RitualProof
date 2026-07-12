@@ -48,6 +48,18 @@ The 10 image features are cheap forensic stats (mean luma, luma σ, mean R/G/B,
 Laplacian energy, ∂x/∂y gradients, saturation, edge density). A real detector
 would take a richer vector — swap the model and feature extractor together.
 
+## Two frontends
+
+- **`web/`** — the polished, cinematic UI (GSAP animations, verdict reveal, live
+  registry ticker). Ported from a design prototype and wired to the live
+  contract. Run with `npm run web` → http://localhost:5180.
+- **`frontend/`** — a minimal reference UI (same functionality, no animation).
+  Run with `npm run frontend` → http://localhost:5173.
+
+Both talk to the same deployed `MediaRegistry`. `web/` adds a two-step flow:
+drop → on-chain **preview** verdict (free read via `previewScore`) → **Etch
+on-chain** (a real `analyze()` transaction that writes the immutable record).
+
 ## Project layout
 
 ```
